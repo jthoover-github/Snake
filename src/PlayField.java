@@ -10,25 +10,26 @@ public class PlayField extends JPanel implements ActionListener {
 
     private static final long serialVersionUID = 1L;
 
-    private static final int PIXEL_SIZE = 15;
-    private static final int SCREEN_WIDTH = 40;
-    private static final int SCREEN_HEIGHT = 27;
+    private static final int PIXEL_SIZE = 7*2;
+    private static final int SCREEN_WIDTH = 65;
+    private static final int SCREEN_HEIGHT = 45;
     private static final int GAME_UNITS = SCREEN_WIDTH * SCREEN_HEIGHT;
 
     private static final int MAX_FPS = 7;
     private static int DELAY = 1000 / MAX_FPS;
     private final int[] x = new int[GAME_UNITS];
     private final int[] y = new int[GAME_UNITS];
+    private Coords[] border = new Coords[(SCREEN_WIDTH+SCREEN_HEIGHT-2)*2]; 
 
     private int snakeLength = 15;
-    private Move move = Move.RIGHT;
+    private Move move = Move.UP;
     private boolean running = false;
     private Timer timer;
     //private final Random random;
 
     public PlayField() {
         //random = new Random();
-        this.setPreferredSize(new Dimension(SCREEN_WIDTH * PIXEL_SIZE, SCREEN_HEIGHT * PIXEL_SIZE));
+        this.setPreferredSize(new Dimension(SCREEN_WIDTH * PIXEL_SIZE + 15 * PIXEL_SIZE, SCREEN_HEIGHT * PIXEL_SIZE));
         this.setBackground(Color.BLACK);
         this.setFocusable(true);
         this.addKeyListener(new SnakeControl());
@@ -38,6 +39,29 @@ public class PlayField extends JPanel implements ActionListener {
     private void startGame() {
         running = true;
         timer = new Timer(DELAY, this);
+        x[0] = SCREEN_WIDTH / 2 - 1;
+        y[0] = SCREEN_HEIGHT - 2;
+        for (int i = 1; i < snakeLength; i++) {
+            x[i] = SCREEN_WIDTH / 2 - 1;
+            y[i] = SCREEN_HEIGHT - 1;
+        }
+        int bi = 0;
+        for (int i = 0; i < SCREEN_WIDTH; i++ ) {
+            border[bi] = new Coords(i,0);
+            bi++;
+            border[bi] = new Coords(i, SCREEN_HEIGHT - 1);
+            bi++;
+        }
+        for (int i = 1; i < SCREEN_HEIGHT - 1; i++ ) {
+            border[bi] = new Coords(0,i);
+            bi++;
+            border[bi] = new Coords(SCREEN_WIDTH - 1,i);
+            bi++;
+        }
+
+        System.out.println(bi);
+        System.out.println(border[0].getX());
+
         timer.start();
     }
 
@@ -48,8 +72,15 @@ public class PlayField extends JPanel implements ActionListener {
 
     private void draw(Graphics g) {
         if (running) {
-            // draw Snake
             int b = PIXEL_SIZE;
+            // draw Border
+            for (int i = 0; i < border.length; i++) {
+                if (border[i]!=null) {
+                    g.setColor(Color.BLUE);
+                    g.fillRect(border[i].getX()*b,border[i].getY()*b, b, b);
+                }
+            }
+            // draw Snake
             for (int i = 0; i < snakeLength; i++) {
 
                 if (i == 0) {
@@ -88,7 +119,7 @@ public class PlayField extends JPanel implements ActionListener {
 
     private void checkCollision() {
         // Hitting a border
-        if (x[0] < 0 || x[0] >= SCREEN_WIDTH || y[0] < 0 || y[0] >= SCREEN_HEIGHT) {
+        if (x[0] < 1 || x[0] >= SCREEN_WIDTH - 1 || y[0] < 1 || y[0] >= SCREEN_HEIGHT - 1) {
             running = false;
         }
         if (!running) {
