@@ -4,32 +4,41 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.util.ArrayList;
 //import java.util.Random;
 
 public class PlayField extends JPanel implements ActionListener {
 
     private static final long serialVersionUID = 1L;
 
-    private static final int PIXEL_SIZE = 7*2;
+    private static final int SCALE = 3;  //scale can be in range(1-3)
+    private static final int BLOCK_SIZE = 8*SCALE;
     private static final int SCREEN_WIDTH = 65;
     private static final int SCREEN_HEIGHT = 45;
     private static final int GAME_UNITS = SCREEN_WIDTH * SCREEN_HEIGHT;
 
-    private static final int MAX_FPS = 7;
+    private static final int MAX_FPS = 5;
     private static int DELAY = 1000 / MAX_FPS;
     private final int[] x = new int[GAME_UNITS];
     private final int[] y = new int[GAME_UNITS];
     private Coords[] border = new Coords[(SCREEN_WIDTH+SCREEN_HEIGHT-2)*2]; 
 
-    private int snakeLength = 15;
+    private int snakeLength = 10;
     private Move move = Move.UP;
     private boolean running = false;
     private Timer timer;
+
+    private GraphicObject scoreLabel;
+    private GraphicObject levelLabel;
+    private GraphicObject snakeLabel;
+    private GraphicObject appleLabel;
+    private GraphicObject[] digits = new GraphicObject[10];
+
     //private final Random random;
 
     public PlayField() {
         //random = new Random();
-        this.setPreferredSize(new Dimension(SCREEN_WIDTH * PIXEL_SIZE + 15 * PIXEL_SIZE, SCREEN_HEIGHT * PIXEL_SIZE));
+        this.setPreferredSize(new Dimension(SCREEN_WIDTH * BLOCK_SIZE + 15 * BLOCK_SIZE, SCREEN_HEIGHT * BLOCK_SIZE));
         this.setBackground(Color.BLACK);
         this.setFocusable(true);
         this.addKeyListener(new SnakeControl());
@@ -37,6 +46,17 @@ public class PlayField extends JPanel implements ActionListener {
     }
 
     private void startGame() {
+        GraphicObject.setScale(SCALE);
+        GraphicObject.setBlockSize(BLOCK_SIZE);
+        //ArrayList<Coords> score = new ArrayList<Coords>();
+        //score = Font8x8.charCoordArray('B');
+        scoreLabel = new GraphicObject(Font8x8.stringCoordArray("SCORE: "));
+        levelLabel = new GraphicObject(Font8x8.stringCoordArray("LEVEL: "));
+        snakeLabel = new GraphicObject(Font8x8.stringCoordArray("SNAKES: "));
+        appleLabel = new GraphicObject(Font8x8.stringCoordArray("APPLES: "));
+        for (int i = 0; i < 10; i++) {
+            digits[i] = new GraphicObject(Font8x8.charCoordArray((char)(i)));
+        }
         running = true;
         timer = new Timer(DELAY, this);
         x[0] = SCREEN_WIDTH / 2 - 1;
@@ -72,7 +92,7 @@ public class PlayField extends JPanel implements ActionListener {
 
     private void draw(Graphics g) {
         if (running) {
-            int b = PIXEL_SIZE;
+            int b = BLOCK_SIZE;
             // draw Border
             for (int i = 0; i < border.length; i++) {
                 if (border[i]!=null) {
@@ -91,6 +111,13 @@ public class PlayField extends JPanel implements ActionListener {
                     g.fillRect(x[i]*b, y[i]*b, b, b);
                 }
             }
+
+            scoreLabel.draw(g, 67, 8, Color.WHITE);
+            levelLabel.draw(g, 67, 14, Color.ORANGE);
+            snakeLabel.draw(g, 67, 20, Color.GREEN);
+            appleLabel.draw(g, 67, 26, Color.RED);
+    
+
         } else {
             gameOver(g);
         }
@@ -128,11 +155,19 @@ public class PlayField extends JPanel implements ActionListener {
     }
 
     private void gameOver(Graphics g) {
-        g.setColor(Color.RED);
-        g.setFont(new Font("Arial", Font.BOLD, 60));
-        FontMetrics metrics2 = getFontMetrics(g.getFont());
-        String gameOver = "GAME OVER";
-        g.drawString(gameOver, (SCREEN_WIDTH * PIXEL_SIZE - metrics2.stringWidth(gameOver)) / 2, SCREEN_HEIGHT * PIXEL_SIZE / 2);
+
+        GraphicObject GO;
+        ArrayList<Coords> gameover = new ArrayList<Coords>();
+        gameover = Font8x8.stringCoordArray("GAME OVER!");
+        GO = new GraphicObject(gameover);
+        GraphicObject.setScale(SCALE*3);
+        GO.draw(g, 24, 20, Color.RED);
+
+        //g.setColor(Color.RED);
+        //g.setFont(new Font("Arial", Font.BOLD, 60));
+        //FontMetrics metrics2 = getFontMetrics(g.getFont());
+        //String gameOver = "GAME OVER";
+        //g.drawString(gameOver, (SCREEN_WIDTH * BLOCK_SIZE - metrics2.stringWidth(gameOver)) / 2, SCREEN_HEIGHT * BLOCK_SIZE / 2);
     }
 
     @Override
