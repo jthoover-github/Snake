@@ -13,7 +13,7 @@ public class PlayField extends JPanel implements ActionListener {
 
     private static final int SCALE = 3;  //scale can be in range(1-3)
     private static final int BLOCK_SIZE = 8*SCALE;
-    private static final int SCREEN_WIDTH = 65;
+    private static final int SCREEN_WIDTH = 70;
     private static final int SCREEN_HEIGHT = 45;
     private static final int GAME_UNITS = SCREEN_WIDTH * SCREEN_HEIGHT;
 
@@ -34,11 +34,26 @@ public class PlayField extends JPanel implements ActionListener {
     private GraphicObject appleLabel;
     private GraphicObject[] digits = new GraphicObject[10];
 
+    private PlayFieldObject appleSprite;
+    private PlayFieldObject snakeUp;
+    private PlayFieldObject snakeDown;
+    private PlayFieldObject snakeLeft;
+    private PlayFieldObject snakeRight;
+    private PlayFieldObject snakeHorz;
+    private PlayFieldObject snakeVert;
+    private PlayFieldObject snakeUL;
+    private PlayFieldObject snakeUR;
+    private PlayFieldObject snakeDL;
+    private PlayFieldObject snakeDR;
+    private PlayFieldObject snakeTailUp;
+    private PlayFieldObject snakeTailDown;
+    private PlayFieldObject snakeTailRight;
+    private PlayFieldObject snakeTailLeft;
     //private final Random random;
 
     public PlayField() {
         //random = new Random();
-        this.setPreferredSize(new Dimension(SCREEN_WIDTH * BLOCK_SIZE + 15 * BLOCK_SIZE, SCREEN_HEIGHT * BLOCK_SIZE));
+        this.setPreferredSize(new Dimension(SCREEN_WIDTH * BLOCK_SIZE + 10 * BLOCK_SIZE + 1, SCREEN_HEIGHT * BLOCK_SIZE + 1));
         this.setBackground(Color.BLACK);
         this.setFocusable(true);
         this.addKeyListener(new SnakeControl());
@@ -55,8 +70,24 @@ public class PlayField extends JPanel implements ActionListener {
         snakeLabel = new GraphicObject(Font8x8.stringCoordArray("SNAKES: "));
         appleLabel = new GraphicObject(Font8x8.stringCoordArray("APPLES: "));
         for (int i = 0; i < 10; i++) {
-            digits[i] = new GraphicObject(Font8x8.charCoordArray((char)(i)));
+            digits[i] = new GraphicObject(Font8x8.charCoordArray((char)(i+48)));
         }
+        appleSprite = new PlayFieldObject(Sprites.appleColorCoords());
+        snakeUp = new PlayFieldObject(Sprites.snakeUpColorCoords());
+        snakeDown = new PlayFieldObject(Sprites.snakeDownColorCoords());
+        snakeLeft = new PlayFieldObject(Sprites.snakeLeftColorCoords());
+        snakeRight = new PlayFieldObject(Sprites.snakeRightColorCoords());
+        snakeHorz = new PlayFieldObject(Sprites.snakeHorzColorCoords());
+        snakeVert = new PlayFieldObject(Sprites.snakeVertColorCoords());
+        snakeDL = new PlayFieldObject(Sprites.snakeDLColorCoords());
+        snakeDR = new PlayFieldObject(Sprites.snakeDRColorCoords());
+        snakeUL = new PlayFieldObject(Sprites.snakeULColorCoords());
+        snakeUR = new PlayFieldObject(Sprites.snakeURColorCoords());
+        snakeTailUp = new PlayFieldObject(Sprites.snakeTailUpColorCoords());
+        snakeTailDown = new PlayFieldObject(Sprites.snakeTailDownColorCoords());
+        snakeTailLeft = new PlayFieldObject(Sprites.snakeTailLeftColorCoords());
+        snakeTailRight = new PlayFieldObject(Sprites.snakeTailRightColorCoords());
+
         running = true;
         timer = new Timer(DELAY, this);
         x[0] = SCREEN_WIDTH / 2 - 1;
@@ -104,19 +135,60 @@ public class PlayField extends JPanel implements ActionListener {
             for (int i = 0; i < snakeLength; i++) {
 
                 if (i == 0) {
-                    g.setColor(Color.getColor("", 0x007f00));
-                    g.fillRect(x[i]*b, y[i]*b, b, b);
+                    //g.setColor(Color.getColor("", 0x007f00));
+                    //g.fillRect(x[i]*b, y[i]*b, b, b);
+                    if (move == Move.UP) {
+                        snakeUp.draw(g, x[i], y[i]);
+                    }
+                    if (move == Move.DOWN) {
+                        snakeDown.draw(g, x[i], y[i]);
+                    }
+                    if (move == Move.LEFT) {
+                        snakeLeft.draw(g, x[i], y[i]);
+                    }
+                    if (move == Move.RIGHT) {
+                        snakeRight.draw(g, x[i], y[i]);
+                    }
                 } else {
-                    g.setColor(Color.GREEN);
-                    g.fillRect(x[i]*b, y[i]*b, b, b);
+                    if (i < snakeLength - 1) {
+                        if (y[i-1] == y[i+1]) snakeHorz.draw(g, x[i], y[i]);
+                        if (x[i-1] == x[i+1]) snakeVert.draw(g, x[i], y[i]);
+                        if ( (y[i-1] < y[i]) && (x[i] < x[i+1]) ) snakeUR.draw(g, x[i], y[i]);
+                        if ( (x[i-1] > x[i]) && (y[i] < y[i+1]) ) snakeDR.draw(g, x[i], y[i]);
+                        if ( (y[i-1] > y[i]) && (x[i] > x[i+1]) ) snakeDL.draw(g, x[i], y[i]);
+                        if ( (x[i-1] < x[i]) && (y[i] > y[i+1]) ) snakeUL.draw(g, x[i], y[i]);
+                        if ( (y[i] < y[i+1]) && (x[i-1] < x[i]) ) snakeDL.draw(g, x[i], y[i]);
+                        if ( (x[i] > x[i+1]) && (y[i-1] < y[i]) ) snakeUL.draw(g, x[i], y[i]);
+                        if ( (y[i] > y[i+1]) && (x[i-1] > x[i]) ) snakeUR.draw(g, x[i], y[i]);
+                        if ( (x[i] < x[i+1]) && (y[i-1] > y[i]) ) snakeDR.draw(g, x[i], y[i]);
+
+                    }
+                    else {
+                        if (y[i-1] > y[i]) snakeTailDown.draw(g, x[i], y[i]);
+                        if (x[i-1] > x[i]) snakeTailRight.draw(g, x[i], y[i]);
+                        if (y[i-1] < y[i]) snakeTailUp.draw(g, x[i], y[i]);
+                        if (x[i-1] < x[i]) snakeTailLeft.draw(g, x[i], y[i]);
+                        //g.setColor(Color.GREEN);
+                        //g.fillRect(x[i]*b, y[i]*b, b, b);
+                    }
                 }
             }
+            appleSprite.draw(g, 10, 10);
 
-            scoreLabel.draw(g, 67, 8, Color.WHITE);
-            levelLabel.draw(g, 67, 14, Color.ORANGE);
-            snakeLabel.draw(g, 67, 20, Color.GREEN);
-            appleLabel.draw(g, 67, 26, Color.RED);
-    
+            scoreLabel.draw(g, 72, 8, Color.WHITE);
+            digits[1].draw(g, 74, 10, Color.WHITE);
+            digits[2].draw(g, 75, 10, Color.WHITE);
+            digits[3].draw(g, 76, 10, Color.WHITE);
+            digits[4].draw(g, 77, 10, Color.WHITE);
+            levelLabel.draw(g, 72, 14, Color.ORANGE);
+            digits[0].draw(g, 76, 16, Color.ORANGE.darker());
+            digits[8].draw(g, 77, 16, Color.ORANGE.darker());
+            snakeLabel.draw(g, 72, 20, Color.GREEN);
+            digits[5].draw(g, 76, 22, Color.GREEN.darker());
+            digits[6].draw(g, 77, 22, Color.GREEN.darker());
+            appleLabel.draw(g, 72, 26, Color.RED);
+            digits[7].draw(g, 76, 28, Color.RED.darker());
+            digits[9].draw(g, 77, 28, Color.RED.darker());
 
         } else {
             gameOver(g);

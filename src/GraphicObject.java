@@ -42,7 +42,7 @@ public class GraphicObject {
                 g.setColor(c);
                 g.fillRect(x*getBlockSize()+xy.getX()*getScale(), y*getBlockSize()+xy.getY()*getScale(), getScale(), getScale()-1);
                 g.setColor(d);
-                g.fillRect(x*getBlockSize()+xy.getX()*getScale(), y*getBlockSize()+xy.getY()*getScale()+getScale()-1, getScale(), 1);
+                g.fillRect(x*getBlockSize()+xy.getX()*getScale(), y*getBlockSize()+(xy.getY()+1)*getScale() - 1, getScale(), 1);
             }
 
         }
