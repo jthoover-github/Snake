@@ -5,7 +5,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
-//import java.util.Random;
+import java.util.Random;
 
 public class PlayField extends JPanel implements ActionListener {
 
@@ -14,17 +14,13 @@ public class PlayField extends JPanel implements ActionListener {
     private static final int BLOCK_SIZE = GameObject.getGameBlockSize();
     private static final int GAME_WIDTH = GameObject.getGameWidth();
     private static final int GAME_HEIGHT = GameObject.getGameHeight();
-    private static final int GAME_UNITS = GameObject.getGameUnits();
 
     private static final int MAX_FPS = 5; // larger number for faster game
     private static int DELAY = 1000 / MAX_FPS;
-    private final int[] x = new int[GAME_UNITS];
-    private final int[] y = new int[GAME_UNITS];
 
-    private int snakeLength = 10;
-    private Move move = Move.UP;
     private boolean running = false;
     private Timer timer;
+    private Random random = new Random();
 
     private TextObject scoreLabel;
     private TextObject levelLabel;
@@ -33,29 +29,13 @@ public class PlayField extends JPanel implements ActionListener {
     private TextObject spaceLabel;
     private TextObject[] digits = new TextObject[10];
 
-    private SpriteObject appleSprite;
-    private SpriteObject snakeUp;
-    private SpriteObject snakeDown;
-    private SpriteObject snakeLeft;
-    private SpriteObject snakeRight;
-    private SpriteObject snakeHorz;
-    private SpriteObject snakeVert;
-    private SpriteObject snakeUL;
-    private SpriteObject snakeUR;
-    private SpriteObject snakeDL;
-    private SpriteObject snakeDR;
-    private SpriteObject snakeTailUp;
-    private SpriteObject snakeTailDown;
-    private SpriteObject snakeTailRight;
-    private SpriteObject snakeTailLeft;
     private Border border = new Border();
     private CountDown counter = new CountDown();
-    //private final Random random;
+    private Snake snake = new Snake();
+    private Apples apples = new Apples();
 
     public PlayField() {
-        //random = new Random();
         this.setPreferredSize(new Dimension(GAME_WIDTH * BLOCK_SIZE + 9 * BLOCK_SIZE, GAME_HEIGHT * BLOCK_SIZE));
-        //System.out.println("Width:" + (GAME_WIDTH * BLOCK_SIZE + 9 * BLOCK_SIZE + 1) + "Heigth: " + (GAME_HEIGHT * BLOCK_SIZE + 1) );
         this.setBackground(Color.BLACK);
         this.setFocusable(true);
         this.addKeyListener(new SnakeControl());
@@ -74,103 +54,43 @@ public class PlayField extends JPanel implements ActionListener {
         for (int i = 0; i < 10; i++) {
             digits[i] = new TextObject(Font8x8.charCoordArray((char)(i+48)));
         }
-        appleSprite = new SpriteObject(Sprites.appleColorCoords());
-        snakeUp = new SpriteObject(Sprites.snakeUpColorCoords());
-        snakeDown = new SpriteObject(Sprites.snakeDownColorCoords());
-        snakeLeft = new SpriteObject(Sprites.snakeLeftColorCoords());
-        snakeRight = new SpriteObject(Sprites.snakeRightColorCoords());
-        snakeHorz = new SpriteObject(Sprites.snakeHorzColorCoords());
-        snakeVert = new SpriteObject(Sprites.snakeVertColorCoords());
-        snakeDL = new SpriteObject(Sprites.snakeDLColorCoords());
-        snakeDR = new SpriteObject(Sprites.snakeDRColorCoords());
-        snakeUL = new SpriteObject(Sprites.snakeULColorCoords());
-        snakeUR = new SpriteObject(Sprites.snakeURColorCoords());
-        snakeTailUp = new SpriteObject(Sprites.snakeTailUpColorCoords());
-        snakeTailDown = new SpriteObject(Sprites.snakeTailDownColorCoords());
-        snakeTailLeft = new SpriteObject(Sprites.snakeTailLeftColorCoords());
-        snakeTailRight = new SpriteObject(Sprites.snakeTailRightColorCoords());
+
+        snake.initialize();
+        border.initialize();
+        counter.initialize();
+        apples.initialize();
+        createApples(1);
 
         running = true;
         timer = new Timer(DELAY, this);
-        x[0] = GAME_WIDTH / 2 - 1;
-        y[0] = GAME_HEIGHT - 2;
-        x[1] = GAME_WIDTH / 2 - 1;
-        y[1] = GAME_HEIGHT - 1;
-        for (int i = 2; i < snakeLength; i++) {
-            x[i] = GAME_WIDTH / 2 - 1;
-            y[i] = GAME_HEIGHT ;
-        }
-
-        //System.out.println(border);
-        border.initialize();
-        counter.initialize();
-        //System.out.println(border);
-
         timer.start();
+
     }
 
     public void paintComponent(Graphics g) {
+
         super.paintComponent(g);
         draw(g);
+
     }
 
     private void draw(Graphics g) {
         if (running) {
 
-            //border.draw(g, Color.RED);
             border.draw(g);
+            apples.draw(g);
             counter.draw(g);
-
-            // draw Snake
-            for (int i = 0; i < snakeLength; i++) {
-
-                if (i == 0) {
-                    //g.setColor(Color.getColor("", 0x007f00));
-                    //g.fillRect(x[i]*b, y[i]*b, b, b);
-                    if (move == Move.UP) {
-                        snakeUp.draw(g, x[i], y[i]);
-                    }
-                    if (move == Move.DOWN) {
-                        snakeDown.draw(g, x[i], y[i]);
-                    }
-                    if (move == Move.LEFT) {
-                        snakeLeft.draw(g, x[i], y[i]);
-                    }
-                    if (move == Move.RIGHT) {
-                        snakeRight.draw(g, x[i], y[i]);
-                    }
-                } else {
-                    if (i < snakeLength - 1) {
-                        if (y[i-1] == y[i+1]) snakeHorz.draw(g, x[i], y[i]);
-                        if (x[i-1] == x[i+1]) snakeVert.draw(g, x[i], y[i]);
-                        if ( (y[i-1] < y[i]) && (x[i] < x[i+1]) ) snakeUR.draw(g, x[i], y[i]);
-                        if ( (x[i-1] > x[i]) && (y[i] < y[i+1]) ) snakeDR.draw(g, x[i], y[i]);
-                        if ( (y[i-1] > y[i]) && (x[i] > x[i+1]) ) snakeDL.draw(g, x[i], y[i]);
-                        if ( (x[i-1] < x[i]) && (y[i] > y[i+1]) ) snakeUL.draw(g, x[i], y[i]);
-                        if ( (y[i] < y[i+1]) && (x[i-1] < x[i]) ) snakeDL.draw(g, x[i], y[i]);
-                        if ( (x[i] > x[i+1]) && (y[i-1] < y[i]) ) snakeUL.draw(g, x[i], y[i]);
-                        if ( (y[i] > y[i+1]) && (x[i-1] > x[i]) ) snakeUR.draw(g, x[i], y[i]);
-                        if ( (x[i] < x[i+1]) && (y[i-1] > y[i]) ) snakeDR.draw(g, x[i], y[i]);
-
-                    }
-                    else {
-                        if (y[i-1] > y[i]) snakeTailDown.draw(g, x[i], y[i]);
-                        if (x[i-1] > x[i]) snakeTailRight.draw(g, x[i], y[i]);
-                        if (y[i-1] < y[i]) snakeTailUp.draw(g, x[i], y[i]);
-                        if (x[i-1] < x[i]) snakeTailLeft.draw(g, x[i], y[i]);
-                        //g.setColor(Color.GREEN);
-                        //g.fillRect(x[i]*b, y[i]*b, b, b);
-                    }
-                }
-            }
-            appleSprite.draw(g, 10, 10);
+            snake.draw(g);
 
             drawScoreBoard(g);
 
         } else {
+
             gameOver(g);
+
         }
     }
+
     private void drawScoreBoard(Graphics g) {
         
         scoreLabel.draw(g, 69, 8, Color.WHITE);
@@ -190,31 +110,20 @@ public class PlayField extends JPanel implements ActionListener {
 
     }
 
-    private void move() {
-        for (int i = snakeLength; i > 0; i--) {
-            x[i] = x[i - 1];
-            y[i] = y[i - 1];
-        }
-        switch (move) {
-            case UP :
-                y[0] = y[0] - 1; 
-                return;
-            case DOWN : 
-                y[0] = y[0] + 1;
-                return;
-            case LEFT : 
-                x[0] = x[0] - 1;
-                return;
-            case RIGHT : 
-                x[0] = x[0] + 1;
-                return;
-        }
-    }
-
     private void checkCollision() {
-        // Hitting a border
-        if (x[0] < 1 || x[0] >= GAME_WIDTH - 1 || y[0] < 1 || y[0] >= GAME_HEIGHT - 1) {
-            running = false;
+
+        if (border.collision(snake.getGameCoords().get(0))) running = false;
+        if (snake.collision(snake.getGameCoords().get(0))) running = false;
+        if (apples.collision(snake.getGameCoords().get(0))) {
+            apples.remove(snake.getGameCoords().get(0));
+            snake.setLength(snake.getLength() + 5);
+            if (apples.getGameCoords().size() == 0) createApples(1);
+            this.counter.refill();
+        }
+        if (this.counter.getFillLevel() == 0) {
+            createApples(1);
+            createApples(1);
+            this.counter.refill();
         }
         if (!running) {
             timer.stop();
@@ -229,17 +138,12 @@ public class PlayField extends JPanel implements ActionListener {
         GO = new TextObject(gameover);
         GO.draw(g, 18, 16, Color.RED, 4);
 
-        //g.setColor(Color.RED);
-        //g.setFont(new Font("Arial", Font.BOLD, 60));
-        //FontMetrics metrics2 = getFontMetrics(g.getFont());
-        //String gameOver = "GAME OVER";
-        //g.drawString(gameOver, (SCREEN_WIDTH * BLOCK_SIZE - metrics2.stringWidth(gameOver)) / 2, SCREEN_HEIGHT * BLOCK_SIZE / 2);
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
         if (running) {
-            move();
+            snake.move();
             checkCollision();
         }
         repaint();
@@ -250,26 +154,57 @@ public class PlayField extends JPanel implements ActionListener {
         public void keyPressed(KeyEvent e) {
             switch (e.getKeyCode()) {
                 case KeyEvent.VK_LEFT:
-                    if (move != Move.RIGHT) {
-                        move = Move.LEFT;
+                    if (snake.getMove() != Move.RIGHT) {
+                        snake.setMove(Move.LEFT);
                     }
                     break;
                 case KeyEvent.VK_RIGHT:
-                    if (move != Move.LEFT) {
-                        move = Move.RIGHT;
+                    if (snake.getMove() != Move.LEFT) {
+                        snake.setMove(Move.RIGHT);
                     }
                     break;
                 case KeyEvent.VK_UP:
-                    if (move != Move.DOWN) {
-                        move = Move.UP;
+                    if (snake.getMove() != Move.DOWN) {
+                        snake.setMove(Move.UP);
                     }
                     break;
                 case KeyEvent.VK_DOWN:
-                    if (move != Move.UP) {
-                        move = Move.DOWN;
+                    if (snake.getMove() != Move.UP) {
+                        snake.setMove(Move.DOWN);
+                    }
+                    break;
+                case KeyEvent.VK_SPACE:
+                    System.out.println("SPACE");
+                    if (running == false) {
+                        snake.initialize();
+                        running = true;
+                        timer.start();
+                        snake.setMove(Move.UP);
                     }
                     break;
             }
         }
     }
+
+    private void createApples(int n) {
+
+        boolean collision = true;
+        int ax = 0;
+        int ay = 0;
+
+        while (collision) {
+
+            ax = random.nextInt(GameObject.getGameWidth());
+            ay = random.nextInt(GameObject.getGameHeight());
+            
+            if ( (!border.collision(new Coords(ax,ay))) && (!snake.collision(new Coords(ax,ay))) ){
+                collision = false;
+            }
+
+        }
+
+        apples.add(new Coords(ax,ay));
+
+    }
+
 }

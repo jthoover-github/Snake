@@ -11,16 +11,17 @@ public class CountDown extends GameObject{
         0x55, 0xAA, 0x55, 0xAA, 0x55, 0xAA, 0x55, 0xAA ));
 
     private int fillLevel = GameObject.getGameHeight() - 2;
+    private int delay = 1;
     
     @Override
     public void initialize() {
         
-        ArrayList<Coords> albc = this.getGameCoords();
-        albc.clear();
+        ArrayList<Coords> alcc = this.getGameCoords();
+        alcc.clear();
 
         for (int i = 1; i < GameObject.getGameHeight() - 2; i++ ) {
-            albc.add(new Coords(0,i));
-            albc.add(new Coords(GameObject.getGameWidth() - 1, i));
+            alcc.add(new Coords(0,i));
+            alcc.add(new Coords(GameObject.getGameWidth() - 1, i));
         }
 
         super.initialize();
@@ -31,11 +32,11 @@ public class CountDown extends GameObject{
     public String toString() {
 
         String s = "";
-        ArrayList<Coords> albc = this.getGameCoords();
+        ArrayList<Coords> alcc = this.getGameCoords();
 
-        for (int i = 0; i < albc.size(); i++) {
-            s += albc.get(i).toString() ;
-            if (i != albc.size() -1) s += ",";
+        for (int i = 0; i < alcc.size(); i++) {
+            s += alcc.get(i).toString() ;
+            if (i != alcc.size() -1) s += ",";
         }
         return "Timer [" + s + "]";
     }
@@ -46,8 +47,14 @@ public class CountDown extends GameObject{
         spriteCC = arrayListToCoords(Border.evenGridData, Color.BLUE);
         spriteCC.addAll(arrayListToCoords(Border.oddGridData, Color.RED));
 
-        this.fillLevel = this.fillLevel - 1;
-        if (this.fillLevel == 1) this.fillLevel = GameObject.getGameHeight() - 2;
+        if (this.delay != 0) {
+            this.delay--;
+        } 
+        else {
+            this.fillLevel--;
+            this.delay = 1;
+        }
+        if (this.fillLevel < 0) this.fillLevel = 0;
 
         SpriteObject block = new SpriteObject(spriteCC);
 
@@ -82,5 +89,8 @@ public class CountDown extends GameObject{
         this.fillLevel = fillLevel;
     }
 
+    public void refill() {
+        this.fillLevel = GameObject.getGameHeight() - 2;
+    }
     
 }

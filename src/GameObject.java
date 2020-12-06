@@ -3,7 +3,7 @@ import java.awt.*;
 
 public class GameObject {
     
-    private static final int SCALE = 2;  //scale can be in range(1-3)
+    private static final int SCALE = 3;  //scale can be in range(1-3)
     private static final int BLOCK_SIZE = 8*SCALE; //each game block is an 8x8 grid
     private static final int GAME_WIDTH = 68; // the width x height of the game grid
     private static final int GAME_HEIGHT = 41;
@@ -62,6 +62,19 @@ public class GameObject {
                 if ( (o2Coords.get(i).getX() == gameCoords.get(j).getX()) && (o2Coords.get(i).getY() == gameCoords.get(j).getY()) ) {
                     return true;
                 }
+            }
+        }
+        return false;
+
+    }
+
+    public boolean collision(Coords xy) {
+
+        // check for matching Coords and collision return true
+        
+        for (int i = 0; i < gameCoords.size(); i++) {
+            if ( (xy.getX() == gameCoords.get(i).getX()) && ( xy.getY() == gameCoords.get(i).getY()) ) {
+                return true;
             }
         }
         return false;
