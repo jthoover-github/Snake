@@ -105,7 +105,7 @@ public class Font8x8 {
 
         ArrayList<Coords> cca = new ArrayList<Coords>();
         int index = (int)(c);
-        System.out.println(index);
+        //System.out.println(index);
 
         if ((index >= 20) && (index <= 127)) {
             int i = (index - 32) * 8;

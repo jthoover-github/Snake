@@ -1,26 +1,18 @@
 import java.util.ArrayList;
 import java.awt.*;
 
-public class PlayFieldObject {
+public class SpriteObject {
     
     private ArrayList<ColorCoords> pfca = new ArrayList<ColorCoords>();
-    private static int blockSize = 24;
-    private static int scale = 3;
+    private static final int blockSize = GameObject.getGameBlockSize();
+    private static final int scale = GameObject.getGameScale();
 
-    public PlayFieldObject(){
+    public SpriteObject(){
         
     }
 
-    public PlayFieldObject(ArrayList<ColorCoords> pfca) {
+    public SpriteObject(ArrayList<ColorCoords> pfca) {
         this.pfca = pfca;
-    }
-
-    public static void setScale(int s) {
-        scale = s;
-    }
-
-    public static void setBlockSize(int b) {
-        blockSize = b;
     }
 
     public static int getScale() {
