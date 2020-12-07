@@ -40,7 +40,7 @@ public class Apples extends GameObject{
 
     public void add(Coords ac) {
         this.getGameCoords().add(ac);
-        System.out.println(this.toString());
+        //System.out.println(this.toString());
     }
 
     public void remove(Coords ac) {

@@ -68,7 +68,7 @@ public class Snake extends GameObject {
             alsc.add(new Coords(GameObject.getGameWidth() / 2 - 1, GameObject.getGameHeight()));
         }
 
-        System.out.println(this.toString());
+        //System.out.println(this.toString());
         super.initialize();
 
     }
@@ -169,7 +169,7 @@ public class Snake extends GameObject {
 
         if (this.getLength() <= this.getGameCoords().size()) {
             this.getGameCoords().remove(this.getGameCoords().size() - 1);
-            System.out.println(this.getGameCoords().size());
+            //System.out.println(this.getGameCoords().size());
         }
 
         switch (this.move) {

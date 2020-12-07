@@ -16,7 +16,7 @@ public class PlayField extends JPanel implements ActionListener {
     private static final int GAME_HEIGHT = GameObject.getGameHeight();
 
     private static final int MAX_FPS = 5; // larger number for faster game
-    private static int DELAY = 1000 / MAX_FPS;
+    private static int DELAY = 1000 / MAX_FPS + 1;
 
     private boolean running = false;
     private Timer timer;
@@ -24,15 +24,18 @@ public class PlayField extends JPanel implements ActionListener {
 
     private TextObject scoreLabel;
     private TextObject levelLabel;
-    private TextObject snakeLabel;
+    //private TextObject snakeLabel;
     private TextObject appleLabel;
-    private TextObject spaceLabel;
+    //private TextObject spaceLabel;
     private TextObject[] digits = new TextObject[10];
 
     private Border border = new Border();
     private CountDown counter = new CountDown();
     private Snake snake = new Snake();
     private Apples apples = new Apples();
+    private int score = 0;
+    private int appleCount = 10;
+    private int level = 1;
 
     public PlayField() {
         this.setPreferredSize(new Dimension(GAME_WIDTH * BLOCK_SIZE + 9 * BLOCK_SIZE, GAME_HEIGHT * BLOCK_SIZE));
@@ -48,9 +51,9 @@ public class PlayField extends JPanel implements ActionListener {
         //score = Font8x8.charCoordArray('B');
         scoreLabel = new TextObject(Font8x8.stringCoordArray("SCORE: "));
         levelLabel = new TextObject(Font8x8.stringCoordArray("LEVEL: "));
-        snakeLabel = new TextObject(Font8x8.stringCoordArray("SNAKES: "));
+        //snakeLabel = new TextObject(Font8x8.stringCoordArray("SNAKES: "));
         appleLabel = new TextObject(Font8x8.stringCoordArray("APPLES: "));
-        spaceLabel = new TextObject(Font8x8.charCoordArray((char)(32)));
+        //spaceLabel = new TextObject(Font8x8.charCoordArray((char)(32)));
         for (int i = 0; i < 10; i++) {
             digits[i] = new TextObject(Font8x8.charCoordArray((char)(i+48)));
         }
@@ -93,20 +96,36 @@ public class PlayField extends JPanel implements ActionListener {
 
     private void drawScoreBoard(Graphics g) {
         
+        int d = 0;
+        int a = 0;
+        int l = 0;
+
         scoreLabel.draw(g, 69, 8, Color.WHITE);
-        digits[1].draw(g, 72, 10, Color.WHITE);
-        spaceLabel.draw(g, 73, 10, Color.WHITE);
-        digits[3].draw(g, 74, 10, Color.WHITE);
-        digits[4].draw(g, 75, 10, Color.WHITE);
+        d = score / 1000;
+        //System.out.println(d);
+        digits[d].draw(g, 72, 10, Color.WHITE);
+        d = (score % 1000) / 100;
+        //System.out.println(d);
+        digits[d].draw(g, 73, 10, Color.WHITE);
+        d = (score % 100) / 10;
+        //System.out.println(d);
+        digits[d].draw(g, 74, 10, Color.WHITE);
+        d = (score % 10) / 1;
+        //System.out.println(d);
+        digits[d].draw(g, 75, 10, Color.WHITE);
         levelLabel.draw(g, 69, 14, Color.ORANGE);
-        digits[0].draw(g, 73, 16, Color.ORANGE.darker());
-        digits[8].draw(g, 74, 16, Color.ORANGE.darker());
-        snakeLabel.draw(g, 69, 20, Color.GREEN);
-        digits[5].draw(g, 73, 22, Color.GREEN.darker());
-        digits[6].draw(g, 74, 22, Color.GREEN.darker());
+        l = (level) / 10;
+        digits[l].draw(g, 73, 16, Color.ORANGE.darker());
+        l = (level % 10 ) / 1;
+        digits[l].draw(g, 74, 16, Color.ORANGE.darker());
+        //snakeLabel.draw(g, 69, 20, Color.GREEN);
+        //digits[5].draw(g, 73, 22, Color.GREEN.darker());
+        //digits[6].draw(g, 74, 22, Color.GREEN.darker());
         appleLabel.draw(g, 69, 26, Color.RED);
-        digits[7].draw(g, 73, 28, Color.RED.darker());
-        digits[9].draw(g, 74, 28, Color.RED.darker());
+        a = (appleCount) / 10;
+        digits[a].draw(g, 73, 28, Color.RED.darker());
+        a = (appleCount % 10) / 1;
+        digits[a].draw(g, 74, 28, Color.RED.darker());
 
     }
 
@@ -119,14 +138,27 @@ public class PlayField extends JPanel implements ActionListener {
             snake.setLength(snake.getLength() + 5);
             if (apples.getGameCoords().size() == 0) createApples(1);
             this.counter.refill();
+            score = score + 10;
+            appleCount = appleCount - 1;
+            if (appleCount == 0) {
+                level++;
+                timer.stop();
+                DELAY = 1000 / (MAX_FPS + level);
+                timer = new Timer(DELAY, this);
+                timer.start();
+                appleCount = 10;
+            }
         }
         if (this.counter.getFillLevel() == 0) {
             createApples(1);
             createApples(1);
+            appleCount = appleCount + 2;
             this.counter.refill();
         }
         if (!running) {
             timer.stop();
+            DELAY = 1000 / (MAX_FPS + level);
+            timer = new Timer(DELAY, this);
         }
     }
 
@@ -180,6 +212,9 @@ public class PlayField extends JPanel implements ActionListener {
                         running = true;
                         timer.start();
                         snake.setMove(Move.UP);
+                        score = 0;
+                        level = 1;
+                        appleCount = 10;
                     }
                     break;
             }

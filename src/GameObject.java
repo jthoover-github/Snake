@@ -3,7 +3,7 @@ import java.awt.*;
 
 public class GameObject {
     
-    private static final int SCALE = 3;  //scale can be in range(1-3)
+    private static final int SCALE = 1;  //scale can be in range(1-3)
     private static final int BLOCK_SIZE = 8*SCALE; //each game block is an 8x8 grid
     private static final int GAME_WIDTH = 68; // the width x height of the game grid
     private static final int GAME_HEIGHT = 41;
